@@ -1,0 +1,13 @@
+h1 {
+    color: red;
+    text-align: center;
+}
+
+#foo {
+    color: blue;
+}
+
+.baz {
+    color: orange;
+    font-family: Courier;
+}

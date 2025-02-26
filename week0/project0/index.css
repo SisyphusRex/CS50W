@@ -18,6 +18,47 @@ nav a:hover {
     opacity: .85;
 }
 
+.littlelogo {
+    margin-top: -30px;
+
+}
+
+.advancedtop {
+    color: #d93025;
+
+    margin: 25px 35px;
+    font: 20px Arial;
+}
+
+.advancedrow {
+    display: flex;
+    margin-left: 35px;
+    margin-top: 20px;
+
+}
+
+.advancedrow .label {
+    min-width: 200px;
+    font-size: 12px Arial;
+}
+
+.formintro {
+    margin-top: 50px;
+    margin-left: 35px;
+    font: 15px Arial;
+}
+
+.bottom-row {
+    text-align: center;
+    margin-top: 20px;
+}
+
+
+
+.advancedrow .advanced-input {
+    width: 500px;
+}
+
 .section-1 {
     flex: 1;
 }
@@ -29,12 +70,18 @@ nav a:hover {
 }
 
 .section-1 .imagetext {
-
     margin: 0px auto;
     margin-top: 107px;
-    margin-left: auto;
-    margin-right: auto;
+    text-align: center;
+    margin-bottom: -23px;
+}
 
+.section-1 .imagetext .textover {
+    position: relative;
+    left: 105px;
+    bottom: 25px;
+    font: 16px Arial;
+    color: #4285f4;
 }
 
 .search-box {
@@ -87,4 +134,20 @@ nav a:hover {
 
 .search-button:hover {
     border: 1px solid #aaa;
+}
+
+.advanced-button {
+    background-color: #4285f4;
+    color: white;
+    font-size: 14px;
+    border-radius: 4px;
+    padding: 9px 15px;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: border-color 100ms;
+}
+
+.advanced-button:hover {
+    border: 1px solid blue;
 }

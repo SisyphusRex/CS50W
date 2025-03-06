@@ -1,4 +1,4 @@
-#!/c/Users/twpod/AppData/Local/Microsoft/WindowsApps/python
+#!/usr/bin/env python
 """main program"""
 import sys
 
@@ -6,7 +6,11 @@ import sys
 def run(*args):
     x = int(input("x: "))
     y = int(input("y: "))
-    result = int(x / y)
+    try:
+        result = x / y
+    except ZeroDivisionError:
+        print("Error: Cannot divide by 0")
+        sys.exit(1)
 
     print(f"x: {x}\ny: {y}\nresult: {result}")
 

@@ -11,3 +11,8 @@ def index(request):
         request, "newyear/index.html", {"newyear": now.month == 1 and now.day == 1}
     )
     # in the above render function, we are passing the variable "newyear" into the template "newyear/index.html"
+
+
+def today(request):
+    now = datetime.datetime.now()
+    return render(request, "newyear/today.html", {"now": now})

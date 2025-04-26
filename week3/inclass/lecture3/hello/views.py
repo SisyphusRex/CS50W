@@ -8,12 +8,12 @@ def index(request):
 
 
 def brian(request):
-    return HttpResponse("Hello, Brian!")
+    return HttpResponse("Hello, brian!")
 
 
 def david(request):
     return HttpResponse("Hello, David!")
 
 
-def greet(request, name):
+def greet(request, name):  # name is the variable we established in urls.py
     return HttpResponse(f"Hello, {name.capitalize()}!")

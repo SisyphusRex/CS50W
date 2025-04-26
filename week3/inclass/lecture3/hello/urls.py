@@ -3,8 +3,9 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("<str:name>", views.greet, name="greet"),
+    path("david", views.david, name="david"),
     path("brian", views.brian, name="brian"),
-    path("david", views.david, name="david")
-
+    path(
+        "<str:name>", views.greet, name="greet"
+    ),  # <str:name> assigns the variable name with string from url and is used in views.py
 ]

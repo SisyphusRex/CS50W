@@ -16,4 +16,10 @@ def david(request):
 
 
 def greet(request, name):  # name is the variable we established in urls.py
-    return HttpResponse(f"Hello, {name.capitalize()}!")
+    return render(
+        request,
+        "hello/greet.html",
+        {
+            "name": name.capitalize(),
+        },
+    )

@@ -18,24 +18,16 @@ def index(request):
         form = SearchForm(request.POST)
         if form.is_valid():
             search_title = form.cleaned_data["search"]
-            text = util.get_entry(search_title)
-            if text is None:
-                return render(
-                    request,
-                    "encyclopedia/entryNotFound.html",
-                    {
-                        "title": search_title,
-                    },
-                )
-            else:
-                return render(
-                    request,
-                    "encyclopedia/display.html",
-                    {
-                        "title": search_title,
-                        "text": markdown2.markdown(text),
-                    },
-                )
+            return HttpResponseRedirect(reverse("display", args=(search_title,)))
+        else:
+            return render(
+                request,
+                "encyclopedia/index.html",
+                {
+                    "entries": util.list_entries(),
+                    "search_form": SearchForm(),
+                },
+            )
     else:
         return render(
             request,
@@ -49,6 +41,13 @@ def index(request):
 
 def display(request, title):
 
+    if request.method == "POST":
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            search_title = form.cleaned_data["search"]
+            return HttpResponseRedirect(reverse("display", args=(search_title,)))
+        else:
+            return HttpResponseRedirect(reverse("display", args=(title,)))
     text = util.get_entry(title)
 
     if text is None:
@@ -57,11 +56,16 @@ def display(request, title):
             "encyclopedia/entryNotFound.html",
             {
                 "title": title,
+                "search_form": SearchForm(),
             },
         )
     else:
         return render(
             request,
             "encyclopedia/display.html",
-            {"title": title, "text": markdown2.markdown(text)},
+            {
+                "title": title,
+                "text": markdown2.markdown(text),
+                "search_form": SearchForm(),
+            },
         )

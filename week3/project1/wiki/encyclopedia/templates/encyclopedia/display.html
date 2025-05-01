@@ -6,5 +6,7 @@
 
 {% block body %}
   {{ text|safe }}
-
+  <form method="GET" action="{% url 'edit' title=title %}">
+    <input type="submit" value="Edit">
+  </form>
 {% endblock %}

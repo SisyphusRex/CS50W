@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -7,6 +8,9 @@ class User(AbstractUser):
 
     id = models.AutoField(
         primary_key=True,
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
     )
 
 
@@ -46,6 +50,8 @@ class Listing(models.Model):
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
+        blank=True,
+        null=True,
         related_name="listings_by_category",
     )
     is_active = models.BooleanField(
@@ -63,6 +69,12 @@ class Listing(models.Model):
         blank=True,
         null=True,
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def __str__(self):
+        return f"{self.title}"
 
 
 class Bid(models.Model):
@@ -85,7 +97,7 @@ class Bid(models.Model):
         max_digits=10,
         decimal_places=2,
     )
-    current = models.BooleanField(
+    is_current = models.BooleanField(
         default=False,
     )
 

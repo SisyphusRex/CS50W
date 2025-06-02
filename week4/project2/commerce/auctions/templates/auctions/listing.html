@@ -1,5 +1,46 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+ <h2>Listing: {{ listing.title }}</h2>
+ <div>
+  <img src="{{ listing.image_url|default_if_none:'No_Image_Available.jpg'}}" alt="{{ listing.title }}">
+ </div>
+
+
+ <div>
+  {{ listing.description }}
+ </div>
+
+
+ <div>
+  <h3>${{ current_bid.amount|default_if_none:'No price available' }}</h3>
+ </div>
+
+ <div>
+  {% if user.is_authenticated %}
+    {% if user == current_bid.user %}
+      {{ number_of_bids }} bid(s) so far.  Your bid is the current bid.
+    {% else %}
+      {{ number_of_bids }} bid(s) so far.
+    {% endif %}
+    <form method="POST">
+      {% csrf_token %}
+      {{ bid_form }}
+    </form>
+
+
+  {% else %}
+    {{ number_of_bids }} bid(s) so far.
+  {% endif %}
+ </div>
+
+ <div>
+  <h4>Details:</h4>
+  <ul>
+    <li>Listed by: {{ listing.user }}</li>
+    <li>Category: {{ listing.category|default_if_none:'No Category'}}</li>
+  </ul>
+ </div>
 
 {% endblock %}
+

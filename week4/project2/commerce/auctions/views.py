@@ -6,6 +6,8 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django import forms
 
+from decimal import Decimal
+
 from .models import User, Listing, Bid, Comment, Category
 
 
@@ -13,7 +15,8 @@ class BidForm(forms.Form):
     bid = forms.DecimalField(
         max_digits=10,
         decimal_places=2,
-        label="New Bid",
+        widget=forms.TextInput(attrs={"placeholder": "Bid"}),
+        label="",
     )
 
 
@@ -98,6 +101,33 @@ def listing(request, listing_id):
         form = BidForm(request.POST)
         if form.is_valid():
             bid_amount = form.cleaned_data["bid"]
+
+        else:
+            return render(
+                request,
+                "auctions/listing.html",
+                {
+                    "listing": this_listing,
+                    "bids": bids,
+                    "current_bid": current_bid,
+                    "number_of_bids": number_of_bids,
+                    "bid_form": BidForm(),
+                },
+            )
+
+        if bid_amount > current_bid.amount:
+            Decimal(bid_amount)
+            new_bid = Bid(
+                user=request.user,
+                listing=this_listing,
+                amount=bid_amount,
+                is_current=True,
+            )
+            new_bid.save()
+            current_bid.is_current = False
+            current_bid.save()
+
+            return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
 
         else:
             return render(

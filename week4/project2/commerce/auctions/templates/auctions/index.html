@@ -3,11 +3,15 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-    <ul>
-      {% for listing in active_listings %}
-      <li><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></li>
-      {% empty %}
-      <li>No Active Listings.</li>
-      {% endfor %}
-    </ul>
+    {% for listing in active_listings %}
+      <div>
+        <index_image src="{{ listing.image_url|default_if_none:'No_Image_Available.jpg'}}" alt="{{ listing.title }}">
+        <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
+        <a>Price: {{ listing.current_price }}</a>
+        <a>Created {{ listing.created_at }}</a>
+      </div>
+    {% empty %}
+      No Active Listings.
+    {% endfor %}
+
 {% endblock %}

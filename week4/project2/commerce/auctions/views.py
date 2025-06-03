@@ -22,10 +22,12 @@ class BidForm(forms.Form):
 
 def index(request):
 
+    active_listings = Listing.objects.filter(is_active=True).order_by("-created_at")
+
     return render(
         request,
         "auctions/index.html",
-        {"active_listings": Listing.objects.filter(is_active=True)},
+        {"active_listings": active_listings},
     )
 
 
@@ -115,7 +117,7 @@ def listing(request, listing_id):
                 },
             )
 
-        if bid_amount > current_bid.amount:
+        if bid_amount > this_listing.current_price:
             Decimal(bid_amount)
             new_bid = Bid(
                 user=request.user,
@@ -126,6 +128,8 @@ def listing(request, listing_id):
             new_bid.save()
             current_bid.is_current = False
             current_bid.save()
+            this_listing.current_price = new_bid.amount
+            this_listing.save()
 
             return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
 

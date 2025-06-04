@@ -20,6 +20,9 @@ class BidForm(forms.Form):
     )
 
 
+class CreateForm(forms.Form): ...
+
+
 def index(request):
 
     active_listings = Listing.objects.filter(is_active=True).order_by("-created_at")
@@ -157,3 +160,37 @@ def listing(request, listing_id):
             "bid_form": BidForm(),
         },
     )
+
+
+def create_listing(request):
+    return render(request, "auctions/create.html")
+
+
+def categories(request):
+
+    # TODO: implement categories view and html presentation with link to list of listings in that category
+
+    my_categories = Category.objects.all().order_by("-title")
+
+    return render(
+        request,
+        "auctions/categories.html",
+        {
+            "categories": my_categories,
+        },
+    )
+
+
+def category(request, title):
+
+    return render(
+        request,
+        "auctions/category",
+        {
+            "title": title,
+        },
+    )
+
+
+def watchlist(request):
+    return render(request, "auctions/watchlist.html")

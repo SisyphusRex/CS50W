@@ -1,0 +1,15 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+  {% if user.is_authenticated %}
+
+    <div>Hello {{ user.username }}.</div>
+
+  {% else %}
+
+  <div>You must login to create a listing.</div>
+
+  {% endif %}
+
+{% endblock %}

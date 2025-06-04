@@ -4,11 +4,16 @@
     <h2>Active Listings</h2>
 
     {% for listing in active_listings %}
-      <div>
-        <index_image src="{{ listing.image_url|default_if_none:'No_Image_Available.jpg'}}" alt="{{ listing.title }}">
-        <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
-        <a>Price: {{ listing.current_price }}</a>
-        <a>Created {{ listing.created_at }}</a>
+      <div class="index_listing">
+        <div>
+          <a href="{% url 'listing' listing.id %}"><img class="index_image" src="{{ listing.image_url|default_if_none:'No_Image_Available.jpg'}}" alt="{{ listing.title }}"></a>
+        </div>
+        <div>
+          <div ><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></div>
+          <div>Price: {{ listing.current_price }}</div>
+          <div>Created {{ listing.created_at }}</div>
+        </div>
+
       </div>
     {% empty %}
       No Active Listings.

@@ -7,7 +7,20 @@ img {
     height: auto;
 }
 
-index_image {
-    max-height: 500px;
-    width: auto;
+.index_image {
+    max-width: 250px;
+    height: auto;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.index_listing {
+    outline: 1px solid rgba(0, 0, 0, .2);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+}
+
+a:hover {
+    text-decoration: underline;
 }

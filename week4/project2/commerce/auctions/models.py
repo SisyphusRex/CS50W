@@ -20,7 +20,7 @@ class Category(models.Model):
     id = models.AutoField(
         primary_key=True,
     )
-    category = models.CharField(
+    title = models.CharField(
         max_length=64,
     )
 

@@ -24,6 +24,9 @@ class Category(models.Model):
         max_length=64,
     )
 
+    def __str__(self):
+        return f"{self.title}"
+
 
 class Listing(models.Model):
     """auction listing class"""
@@ -105,6 +108,9 @@ class Bid(models.Model):
     is_current = models.BooleanField(
         default=False,
     )
+
+    def __str__(self):
+        return f"{self.amount}"
 
 
 class Comment(models.Model):

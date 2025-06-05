@@ -2,6 +2,7 @@
 
 {% block body %}
  <h2>Listing: {{ listing.title }}</h2>
+
  <div>
   <img src="{{ listing.image_url|default_if_none:'No_Image_Available.jpg'}}" alt="{{ listing.title }}">
  </div>
@@ -18,6 +19,14 @@
 
  <div>
   {% if user.is_authenticated %}
+    <form method="POST">
+      {% csrf_token %}
+      {% if user in watchers %}
+        <input type="submit" value="Unwatch" name="unwatch">
+      {% else %}
+        <input type="submit" value="Watch" name = "watch">
+      {% endif %}
+    </form>
     {% if user == current_bid.user %}
       {{ number_of_bids }} bid(s) so far.  Your bid is the current bid.
     {% else %}
@@ -26,7 +35,7 @@
     <form method="POST">
       {% csrf_token %}
       {{ bid_form }}
-      <input type="submit" value="Place Bid">
+      <input type="submit" value="Place Bid" name="bid">
     </form>
 
 
@@ -39,7 +48,15 @@
   <h4>Details:</h4>
   <ul>
     <li>Listed by: {{ listing.user }}</li>
-    <li>Category: {{ listing.category|default_if_none:'No Category'}}</li>
+    <li>Category:<a href="{% url 'category' category.id %}"> {{ listing.category|default_if_none:'No Category'}}</a></li>
+  </ul>
+  <h4>Watchers:</h4>
+  <ul>
+    {% for user in watchers %}
+    <li>{{ user.username}}</li>
+    {% empty %}
+    <li>No watchers.</li>
+    {% endfor %}
   </ul>
  </div>
 

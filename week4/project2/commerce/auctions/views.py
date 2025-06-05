@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -95,6 +96,8 @@ def listing(request, listing_id):
     this_listing = Listing.objects.get(pk=listing_id)
     bids = this_listing.bids_by_listing.all()
     number_of_bids = bids.count()
+    watchers = this_listing.watchers.all()
+    category = this_listing.category
     try:
         current_bid = this_listing.bids_by_listing.get(is_current=True)
     except ObjectDoesNotExist:
@@ -103,40 +106,59 @@ def listing(request, listing_id):
         print("More than one current bid.")
 
     if request.method == "POST":
-        form = BidForm(request.POST)
-        if form.is_valid():
-            bid_amount = form.cleaned_data["bid"]
+        if "bid" in request.POST:
+            form = BidForm(request.POST)
+            if form.is_valid():
+                bid_amount = form.cleaned_data["bid"]
 
-        else:
-            return render(
-                request,
-                "auctions/listing.html",
-                {
-                    "listing": this_listing,
-                    "bids": bids,
-                    "current_bid": current_bid,
-                    "number_of_bids": number_of_bids,
-                    "bid_form": BidForm(),
-                },
-            )
+            else:
+                return render(
+                    request,
+                    "auctions/listing.html",
+                    {
+                        "listing": this_listing,
+                        "bids": bids,
+                        "current_bid": current_bid,
+                        "number_of_bids": number_of_bids,
+                        "bid_form": BidForm(),
+                        "watchers": watchers,
+                        "category": category,
+                    },
+                )
 
-        if bid_amount > this_listing.current_price:
-            Decimal(bid_amount)
-            new_bid = Bid(
-                user=request.user,
-                listing=this_listing,
-                amount=bid_amount,
-                is_current=True,
-            )
-            new_bid.save()
-            current_bid.is_current = False
-            current_bid.save()
-            this_listing.current_price = new_bid.amount
+            if bid_amount > this_listing.current_price:
+                Decimal(bid_amount)
+                new_bid = Bid(
+                    user=request.user,
+                    listing=this_listing,
+                    amount=bid_amount,
+                    is_current=True,
+                )
+                new_bid.save()
+                current_bid.is_current = False
+                current_bid.save()
+                this_listing.current_price = new_bid.amount
+                this_listing.save()
+
+                return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
+
+            else:
+                return render(
+                    request,
+                    "auctions/listing.html",
+                    {
+                        "listing": this_listing,
+                        "bids": bids,
+                        "current_bid": current_bid,
+                        "number_of_bids": number_of_bids,
+                        "bid_form": BidForm(),
+                        "watchers": watchers,
+                        "category": category,
+                    },
+                )
+        elif "watch" in request.POST:
+            this_listing.watchers.add(request.user)
             this_listing.save()
-
-            return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
-
-        else:
             return render(
                 request,
                 "auctions/listing.html",
@@ -146,9 +168,26 @@ def listing(request, listing_id):
                     "current_bid": current_bid,
                     "number_of_bids": number_of_bids,
                     "bid_form": BidForm(),
+                    "watchers": watchers,
+                    "category": category,
                 },
             )
-
+        elif "unwatch" in request.POST:
+            this_listing.watchers.remove(request.user)
+            this_listing.save()
+            return render(
+                request,
+                "auctions/listing.html",
+                {
+                    "listing": this_listing,
+                    "bids": bids,
+                    "current_bid": current_bid,
+                    "number_of_bids": number_of_bids,
+                    "bid_form": BidForm(),
+                    "watchers": watchers,
+                    "category": category,
+                },
+            )
     return render(
         request,
         "auctions/listing.html",
@@ -158,19 +197,15 @@ def listing(request, listing_id):
             "current_bid": current_bid,
             "number_of_bids": number_of_bids,
             "bid_form": BidForm(),
+            "watchers": watchers,
+            "category": category,
         },
     )
 
 
-def create_listing(request):
-    return render(request, "auctions/create.html")
-
-
 def categories(request):
 
-    # TODO: implement categories view and html presentation with link to list of listings in that category
-
-    my_categories = Category.objects.all().order_by("-title")
+    my_categories = Category.objects.all().order_by("title")
 
     return render(
         request,
@@ -181,16 +216,34 @@ def categories(request):
     )
 
 
-def category(request, title):
+def category(request, category_id):
 
+    this_category = Category.objects.get(pk=category_id)
+    listings_in_category = this_category.listings_by_category.filter(is_active=True)
     return render(
         request,
-        "auctions/category",
+        "auctions/category.html",
         {
-            "title": title,
+            "listings_in_category": listings_in_category,
+            "category": this_category,
         },
     )
 
 
+@login_required
 def watchlist(request):
-    return render(request, "auctions/watchlist.html")
+    user = request.user
+    watched_listings = user.watched_listings.all()
+    return render(
+        request,
+        "auctions/watchlist.html",
+        {
+            "watchlist": watched_listings,
+        },
+    )
+
+
+# TODO: add create listing functionality
+@login_required
+def create_listing(request):
+    return render(request, "auctions/create.html")

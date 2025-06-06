@@ -1,10 +1,15 @@
 {% extends "auctions/layout.html" %}
+{% load static %}
 
 {% block body %}
  <h2>Listing: {{ listing.title }}</h2>
 
  <div>
-  <img src="{{ listing.image_url|default_if_none:'No_Image_Available.jpg'}}" alt="{{ listing.title }}">
+  {% if listing.image_url %}
+    <img class="index_image" src="{{ listing.image_url }}" alt="{{ listing.title }}">
+  {% else %}
+    <img class="index_image" src="{% static 'auctions\No_Image_Available.jpg' %}">
+  {% endif %}
  </div>
 
 

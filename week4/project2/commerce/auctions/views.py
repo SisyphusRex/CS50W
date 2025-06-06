@@ -148,11 +148,41 @@ def listing(request, listing_id):
         print("More than one current bid.")
 
     if request.method == "POST":
+        # TODO: the view is not creating a new bid when the user submits
         if "bid" in request.POST:
             form = BidForm(request.POST)
             if form.is_valid():
                 bid_amount = form.cleaned_data["bid"]
+                if bid_amount > this_listing.current_price:
+                    Decimal(bid_amount)
+                    new_bid = Bid(
+                        user=request.user,
+                        listing=this_listing,
+                        amount=bid_amount,
+                        is_current=True,
+                    )
+                    new_bid.save()
+                    current_bid.is_current = False
+                    current_bid.save()
+                    this_listing.current_price = new_bid.amount
+                    this_listing.save()
 
+                    return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
+
+                else:
+                    return render(
+                        request,
+                        "auctions/listing.html",
+                        {
+                            "listing": this_listing,
+                            "bids": bids,
+                            "current_bid": current_bid,
+                            "number_of_bids": number_of_bids,
+                            "bid_form": BidForm(),
+                            "watchers": watchers,
+                            "category": category,
+                        },
+                    )
             else:
                 return render(
                     request,
@@ -168,36 +198,6 @@ def listing(request, listing_id):
                     },
                 )
 
-            if bid_amount > this_listing.current_price:
-                Decimal(bid_amount)
-                new_bid = Bid(
-                    user=request.user,
-                    listing=this_listing,
-                    amount=bid_amount,
-                    is_current=True,
-                )
-                new_bid.save()
-                current_bid.is_current = False
-                current_bid.save()
-                this_listing.current_price = new_bid.amount
-                this_listing.save()
-
-                return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
-
-            else:
-                return render(
-                    request,
-                    "auctions/listing.html",
-                    {
-                        "listing": this_listing,
-                        "bids": bids,
-                        "current_bid": current_bid,
-                        "number_of_bids": number_of_bids,
-                        "bid_form": BidForm(),
-                        "watchers": watchers,
-                        "category": category,
-                    },
-                )
         elif "watch" in request.POST:
             this_listing.watchers.add(request.user)
             this_listing.save()
@@ -285,7 +285,6 @@ def watchlist(request):
     )
 
 
-# TODO: add create listing functionality
 @login_required
 def create_listing(request):
     if request.method == "POST":

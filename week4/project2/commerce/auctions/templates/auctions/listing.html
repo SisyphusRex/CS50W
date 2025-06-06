@@ -48,7 +48,11 @@
   <h4>Details:</h4>
   <ul>
     <li>Listed by: {{ listing.user }}</li>
+    {% if listing.category %}
     <li>Category:<a href="{% url 'category' category.id %}"> {{ listing.category|default_if_none:'No Category'}}</a></li>
+    {% else %}
+    <li>No category</li>
+    {% endif %}
   </ul>
   <h4>Watchers:</h4>
   <ul>

@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django import forms
+from django.forms import ModelForm, Textarea, DecimalField, TextInput
 
 from decimal import Decimal
 
@@ -56,10 +57,13 @@ class ListingForm(forms.ModelForm):
     class Meta:
         model = Listing
         fields = ["title", "description", "image_url", "category", "current_price"]
-
-    def __init__(self):
-        super().__init__()
-        self.fields["current_price"].
+        widgets = {
+            "current_price": TextInput(),
+            "description": Textarea(),
+        }
+        labels = {
+            "title": "Title",
+        }
 
 
 def index(request):
@@ -287,12 +291,30 @@ def create_listing(request):
     if request.method == "POST":
         form = ListingForm(request.POST)
         if form.is_valid():
-            ...
-            # title = form.cleaned_data["title"]
-            # description = form.cleaned_data["description"]
-            # image_url = form.cleaned_data["image_url"]
-            # category = form.cleaned_data["category"]
-            # price = form.cleaned_data["price"]
+            title = form.cleaned_data["title"]
+            description = form.cleaned_data["description"]
+            image_url = form.cleaned_data["image_url"]
+            category = form.cleaned_data["category"]
+            price = form.cleaned_data["current_price"]
+
+            new_listing = Listing(
+                title=title,
+                description=description,
+                image_url=image_url,
+                category=category,
+                current_price=price,
+                user=request.user,
+            )
+            new_listing.save()
+            new_bid = Bid(
+                user=request.user,
+                listing=new_listing,
+                amount=price,
+                is_current=True,
+            )
+            new_bid.save()
+
+            return HttpResponseRedirect(reverse("listing", args=(new_listing.id,)))
 
         else:
             return render(

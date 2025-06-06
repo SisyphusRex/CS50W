@@ -58,7 +58,7 @@ class Listing(models.Model):
         related_name="listings_by_category",
     )
     is_active = models.BooleanField(
-        default=False,
+        default=True,
     )
     watchers = models.ManyToManyField(
         User,

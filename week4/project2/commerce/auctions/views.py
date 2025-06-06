@@ -21,7 +21,45 @@ class BidForm(forms.Form):
     )
 
 
-class CreateForm(forms.Form): ...
+class CreateForm(forms.Form):
+    title = forms.CharField(
+        max_length=64,
+        widget=forms.TextInput(attrs={"placeholder": "Title"}),
+        label="Title*",
+    )
+    description = forms.CharField(
+        max_length=500,
+        widget=forms.TextInput(attrs={"placeholder": "Description"}),
+        label="Description",
+        required=False,
+    )
+    image_url = forms.URLField(
+        max_length=300,
+        widget=forms.TextInput(attrs={"placeholder": "Image URL"}),
+        label="Image URL",
+        required=False,
+    )
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        label="Category",
+        required=False,
+    )
+    price = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.TextInput(attrs={"placeholder": "Price"}),
+        label="Starting Price*",
+    )
+
+
+class ListingForm(forms.ModelForm):
+    class Meta:
+        model = Listing
+        fields = ["title", "description", "image_url", "category", "current_price"]
+
+    def __init__(self):
+        super().__init__()
+        self.fields["current_price"].
 
 
 def index(request):
@@ -246,4 +284,29 @@ def watchlist(request):
 # TODO: add create listing functionality
 @login_required
 def create_listing(request):
-    return render(request, "auctions/create.html")
+    if request.method == "POST":
+        form = ListingForm(request.POST)
+        if form.is_valid():
+            ...
+            # title = form.cleaned_data["title"]
+            # description = form.cleaned_data["description"]
+            # image_url = form.cleaned_data["image_url"]
+            # category = form.cleaned_data["category"]
+            # price = form.cleaned_data["price"]
+
+        else:
+            return render(
+                request,
+                "auctions/create.html",
+                {
+                    "create_form": ListingForm(),
+                },
+            )
+
+    return render(
+        request,
+        "auctions/create.html",
+        {
+            "create_form": ListingForm(),
+        },
+    )

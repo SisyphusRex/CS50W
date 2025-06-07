@@ -14,12 +14,30 @@ from decimal import Decimal
 from .models import User, Listing, Bid, Comment, Category
 
 
-class BidForm(forms.Form):
-    bid = forms.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        label="",
-    )
+# class BidForm(forms.Form):
+#     bid = forms.DecimalField(
+#         max_digits=10,
+#         decimal_places=2,
+#         label="",
+#     )
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ["comment"]
+        widgets = {
+            "comment": Textarea(),
+        }
+
+
+class BidForm(forms.ModelForm):
+    class Meta:
+        model = Bid
+        fields = ["amount"]
+        widgets = {
+            "amount": TextInput(),
+        }
 
 
 class CreateForm(forms.Form):
@@ -137,98 +155,95 @@ def register(request):
 
 def listing(request, listing_id):
 
+    def return_redirect():
+        return HttpResponseRedirect(
+            reverse(
+                "listing",
+                args=(listing_id,),
+            )
+        )
+
+    def return_render():
+        return render(
+            request,
+            "auctions/listing.html",
+            {
+                "listing": this_listing,
+                "bids": bids,
+                "current_bid": current_bid,
+                "number_of_bids": number_of_bids,
+                "bid_form": BidForm(),
+                "watchers": watchers,
+                "category": category,
+                "comments": comments,
+                "comment_form": CommentForm(),
+            },
+        )
+
     this_listing = Listing.objects.get(pk=listing_id)
     bids = this_listing.bids_by_listing.all()
     number_of_bids = bids.count()
     watchers = this_listing.watchers.all()
     category = this_listing.category
-    try:
-        current_bid = this_listing.bids_by_listing.get(is_current=True)
-    except ObjectDoesNotExist:
-        print("No current price.")
-    except MultipleObjectsReturned:
-        print("More than one current bid.")
+    current_bid = this_listing.bids_by_listing.get(is_current=True)
+    comments = this_listing.listing_comments.all()
 
-    if request.method == "POST":
-        # TODO: the view is not creating a new bid when the user submits
-        if "bid" in request.POST:
-            form = BidForm(request.POST)
-            if form.is_valid():
-                bid_amount = form.cleaned_data["bid"]
-                if bid_amount > this_listing.current_price:
-                    Decimal(bid_amount)
-                    new_bid = Bid(
-                        user=request.user,
-                        listing=this_listing,
-                        amount=bid_amount,
-                        is_current=True,
-                    )
-                    new_bid.save()
-                    current_bid.is_current = False
-                    current_bid.save()
-                    this_listing.current_price = new_bid.amount
-                    this_listing.save()
-                    messages.add_message(request, messages.SUCCESS, "Successful Bid")
-
-                    return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
-
-                else:
-                    messages.add_message(request, messages.ERROR, "Bid too low")
-                    return render(
-                        request,
-                        "auctions/listing.html",
-                        {
-                            "listing": this_listing,
-                            "bids": bids,
-                            "current_bid": current_bid,
-                            "number_of_bids": number_of_bids,
-                            "bid_form": BidForm(),
-                            "watchers": watchers,
-                            "category": category,
-                        },
-                    )
-            else:
-                messages.add_message(request, messages.ERROR, "Invalid input")
-                error_dict = form.errors
-                bid_errors = error_dict["bid"]
-                return render(
-                    request,
-                    "auctions/listing.html",
-                    {
-                        "listing": this_listing,
-                        "bids": bids,
-                        "current_bid": current_bid,
-                        "number_of_bids": number_of_bids,
-                        "bid_form": BidForm(),
-                        "watchers": watchers,
-                        "category": category,
-                        "bid_errors": bid_errors,
-                    },
+    if request.method == "POST" and "bid" in request.POST:
+        form = BidForm(request.POST)
+        if form.is_valid():
+            bid_amount = form.cleaned_data["amount"]
+            if bid_amount > this_listing.current_price:
+                Decimal(bid_amount)
+                new_bid = Bid(
+                    user=request.user,
+                    listing=this_listing,
+                    amount=bid_amount,
+                    is_current=True,
                 )
+                new_bid.save()
+                current_bid.is_current = False
+                current_bid.save()
+                this_listing.current_price = bid_amount
+                this_listing.save()
+                messages.add_message(request, messages.SUCCESS, "Successful Bid")
 
-        elif "watch" in request.POST:
-            this_listing.watchers.add(request.user)
-            this_listing.save()
-            return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
+                return_redirect()
 
-        elif "unwatch" in request.POST:
-            this_listing.watchers.remove(request.user)
-            this_listing.save()
-            return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
+            else:
+                messages.add_message(request, messages.ERROR, "Bid too low")
+                return return_render()
+        else:
+            messages.add_message(request, messages.ERROR, "Invalid input")
+            error_dict = form.errors
+            bid_errors = error_dict["amount"]
+            return return_render()
 
-    return render(
-        request,
-        "auctions/listing.html",
-        {
-            "listing": this_listing,
-            "bids": bids,
-            "current_bid": current_bid,
-            "number_of_bids": number_of_bids,
-            "bid_form": BidForm(),
-            "watchers": watchers,
-            "category": category,
-        },
-    )
+    if request.method == "POST" and "watch" in request.POST:
+        this_listing.watchers.add(request.user)
+        this_listing.save()
+        return_redirect()
+
+    if request.method == "POST" and "unwatch" in request.POST:
+        this_listing.watchers.remove(request.user)
+        this_listing.save()
+        return_redirect()
+
+    # TODO: Fix comments saving input button message, not user input
+
+    if request.method == "POST" and "comment" in request.POST:
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.cleaned_data["comment"]
+            new_comment = Comment(
+                listing=this_listing, user=request.user, comment=comment
+            )
+            new_comment.save()
+            messages.add_message(request, messages.SUCCESS, "Comment Added")
+            return_redirect()
+        else:
+            messages.add_message(request, messages.ERROR, "Invalid input")
+            return_render()
+    return return_render()
 
 
 def categories(request):

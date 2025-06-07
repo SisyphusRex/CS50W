@@ -108,6 +108,9 @@ class Bid(models.Model):
     is_current = models.BooleanField(
         default=False,
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
 
     def __str__(self):
         return f"{self.amount}"
@@ -132,3 +135,9 @@ class Comment(models.Model):
     comment = models.CharField(
         max_length=500,
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def __str__(self):
+        return f"{self.comment}"

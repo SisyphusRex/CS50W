@@ -20,7 +20,7 @@
 
 
  <div>
-  <h3>${{ current_bid.amount|default_if_none:'No price available' }}</h3>
+  <h3>${{ listing.current_price }}</h3>
  </div>
 
  <div>
@@ -73,6 +73,22 @@
     <li>No watchers.</li>
     {% endfor %}
   </ul>
+  <h4>Comments:</h4>
+  <ol>
+    {% for comment in comments %}
+    <li>{{ comment.comment }}</li>
+    {% empty %}
+    <li>No comments.</li>
+    {% endfor %}
+  </ol>
+  {% if user.is_authenticated %}
+    <form method="POST">
+      {% csrf_token %}
+      {{ comment_form }}
+      <input type="submit" name="comment">
+    </form>
+  {% endif %}
+
  </div>
 
 {% endblock %}

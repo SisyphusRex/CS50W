@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django import forms
 from django.forms import ModelForm, Textarea, DecimalField, TextInput
+from django.contrib import messages
 
 from decimal import Decimal
 
@@ -17,7 +18,6 @@ class BidForm(forms.Form):
     bid = forms.DecimalField(
         max_digits=10,
         decimal_places=2,
-        widget=forms.TextInput(attrs={"placeholder": "Bid"}),
         label="",
     )
 
@@ -88,6 +88,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
+            messages.add_message(request, messages.SUCCESS, "Logged In")
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(
@@ -101,6 +102,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
+    messages.add_message(request, messages.SUCCESS, "Logged Out")
     return HttpResponseRedirect(reverse("index"))
 
 
@@ -166,10 +168,12 @@ def listing(request, listing_id):
                     current_bid.save()
                     this_listing.current_price = new_bid.amount
                     this_listing.save()
+                    messages.add_message(request, messages.SUCCESS, "Successful Bid")
 
                     return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
 
                 else:
+                    messages.add_message(request, messages.ERROR, "Bid too low")
                     return render(
                         request,
                         "auctions/listing.html",
@@ -184,6 +188,9 @@ def listing(request, listing_id):
                         },
                     )
             else:
+                messages.add_message(request, messages.ERROR, "Invalid input")
+                error_dict = form.errors
+                bid_errors = error_dict["bid"]
                 return render(
                     request,
                     "auctions/listing.html",
@@ -195,41 +202,20 @@ def listing(request, listing_id):
                         "bid_form": BidForm(),
                         "watchers": watchers,
                         "category": category,
+                        "bid_errors": bid_errors,
                     },
                 )
 
         elif "watch" in request.POST:
             this_listing.watchers.add(request.user)
             this_listing.save()
-            return render(
-                request,
-                "auctions/listing.html",
-                {
-                    "listing": this_listing,
-                    "bids": bids,
-                    "current_bid": current_bid,
-                    "number_of_bids": number_of_bids,
-                    "bid_form": BidForm(),
-                    "watchers": watchers,
-                    "category": category,
-                },
-            )
+            return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
+
         elif "unwatch" in request.POST:
             this_listing.watchers.remove(request.user)
             this_listing.save()
-            return render(
-                request,
-                "auctions/listing.html",
-                {
-                    "listing": this_listing,
-                    "bids": bids,
-                    "current_bid": current_bid,
-                    "number_of_bids": number_of_bids,
-                    "bid_form": BidForm(),
-                    "watchers": watchers,
-                    "category": category,
-                },
-            )
+            return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
+
     return render(
         request,
         "auctions/listing.html",

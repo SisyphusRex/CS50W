@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block body %}
+
  <h2>Listing: {{ listing.title }}</h2>
 
  <div>
@@ -37,6 +38,11 @@
     {% else %}
       {{ number_of_bids }} bid(s) so far.
     {% endif %}
+    <ul>
+    {% for error in bid_errors %}
+    <li class="error">{{ error }}</li>
+    {% endfor %}
+  </ul>
     <form method="POST">
       {% csrf_token %}
       {{ bid_form }}

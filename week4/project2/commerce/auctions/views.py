@@ -340,12 +340,14 @@ def user(request, user_id):
     watched_listings = this_user.watched_listings.all()
     won_listings = this_user.won_listings_by_user.all()
     created_listings = this_user.listings_by_user.all()
+    # TODO: fix this subquery
     active_listing_bids = this_user.bids_by_user.filter(
         listing=Subquery(
             Listing.objects.filter(is_active=True),
         )
     )
     winning_bids = []
+    # NOTE: django is throwing a 'row value misused' exception from this loop
     for bid in active_listing_bids:
         if bid.is_current:
             winning_bids.append(bid)

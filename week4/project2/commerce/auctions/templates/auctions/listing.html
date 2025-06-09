@@ -76,7 +76,7 @@
   <h4>Comments:</h4>
   <ol>
     {% for comment in comments %}
-    <li>{{ comment.comment }}</li>
+    <li><b>{{ comment.comment }} </b><i>by </i>{{ comment.user }} <i>on </i>{{ comment.created_at }}</li>
     {% empty %}
     <li>No comments.</li>
     {% endfor %}
@@ -85,7 +85,7 @@
     <form method="POST">
       {% csrf_token %}
       {{ comment_form }}
-      <input type="submit" name="comment">
+      <input type="submit" name="comment_submit">
     </form>
   {% endif %}
 

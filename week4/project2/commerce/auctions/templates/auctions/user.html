@@ -1,0 +1,39 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<h2>{{ user.username }}</h2>
+<h3>Watching</h3>
+<ul>
+  {% for listing in watched_listings %}
+  <li><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></li>
+  {% empty %}
+  <li>None.</li>
+  {% endfor %}
+</ul>
+
+<h3>Created</h3>
+<ul>
+  {% for listing in created_listings %}
+  <li><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></li>
+  {% empty %}
+  <li>None.</li>
+  {% endfor %}
+</ul>
+
+<h3>Won</h3>
+<ul>
+  {% for listing in won_listings %}
+  <li><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></li>
+  {% empty %}
+  <li>None.</li>
+  {% endfor %}
+</ul>
+
+<h3>Active Bids</h3>
+<ul>
+  {% for bid in active_listing_bids %}
+  <li><a href="{% url 'listing' bid.listing.id %}">{{ bid.listing.title }} </a>${{ bid.listing.amount }} {% if bid.is_current %}<b style="color:green">WINNING</b>{% else %}<b style="color:red">LOSING</b></li>
+</ul>
+
+
+{% endblock %}

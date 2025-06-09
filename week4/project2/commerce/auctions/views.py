@@ -8,6 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django import forms
 from django.forms import ModelForm, Textarea, DecimalField, TextInput
 from django.contrib import messages
+from django.db.models import Subquery
 
 from decimal import Decimal
 
@@ -189,9 +190,9 @@ def listing(request, listing_id):
     comments = this_listing.listing_comments.all()
 
     if request.method == "POST" and "bid" in request.POST:
-        form = BidForm(request.POST)
-        if form.is_valid():
-            bid_amount = form.cleaned_data["amount"]
+        bid_form = BidForm(request.POST)
+        if bid_form.is_valid():
+            bid_amount = bid_form.cleaned_data["amount"]
             if bid_amount > this_listing.current_price:
                 Decimal(bid_amount)
                 new_bid = Bid(
@@ -207,42 +208,42 @@ def listing(request, listing_id):
                 this_listing.save()
                 messages.add_message(request, messages.SUCCESS, "Successful Bid")
 
-                return_redirect()
+                return return_redirect()
 
             else:
                 messages.add_message(request, messages.ERROR, "Bid too low")
                 return return_render()
         else:
             messages.add_message(request, messages.ERROR, "Invalid input")
-            error_dict = form.errors
+            error_dict = bid_form.errors
             bid_errors = error_dict["amount"]
             return return_render()
 
     if request.method == "POST" and "watch" in request.POST:
         this_listing.watchers.add(request.user)
         this_listing.save()
-        return_redirect()
+        return return_redirect()
 
     if request.method == "POST" and "unwatch" in request.POST:
         this_listing.watchers.remove(request.user)
         this_listing.save()
-        return_redirect()
+        return return_redirect()
 
-    # TODO: Fix comments saving input button message, not user input
-
-    if request.method == "POST" and "comment" in request.POST:
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.cleaned_data["comment"]
+    if request.method == "POST" and "comment_submit" in request.POST:
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.cleaned_data["comment"]
             new_comment = Comment(
                 listing=this_listing, user=request.user, comment=comment
             )
             new_comment.save()
             messages.add_message(request, messages.SUCCESS, "Comment Added")
-            return_redirect()
+            return return_redirect()
+            messages.add_message(request, messages.ERROR, "not redirected")
         else:
             messages.add_message(request, messages.ERROR, "Invalid input")
-            return_render()
+            return return_render()
+
     return return_render()
 
 
@@ -330,5 +331,34 @@ def create_listing(request):
         "auctions/create.html",
         {
             "create_form": ListingForm(),
+        },
+    )
+
+
+def user(request, user_id):
+    this_user = User.objects.get(id=user_id)
+    watched_listings = this_user.watched_listings.all()
+    won_listings = this_user.won_listings_by_user.all()
+    created_listings = this_user.listings_by_user.all()
+    active_listing_bids = this_user.bids_by_user.filter(
+        listing=Subquery(
+            Listing.objects.filter(is_active=True),
+        )
+    )
+    winning_bids = []
+    for bid in active_listing_bids:
+        if bid.is_current:
+            winning_bids.append(bid)
+
+    return render(
+        request,
+        "auctions/user.html",
+        {
+            "user": this_user,
+            "watched_listings": watched_listings,
+            "won_listings": won_listings,
+            "created_listings": created_listings,
+            "active_listing_bids": active_listing_bids,
+            "winning_bids": winning_bids,
         },
     )

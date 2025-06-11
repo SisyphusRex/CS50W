@@ -1,35 +1,26 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<h2 style="color:aquamarine">{{ user.username }}</h2>
-<h3>Watching</h3>
+
+<h3>Active Listings</h3>
 <ul>
-  {% for listing in watched_listings %}
+  {% for listing in active_listings %}
   <li><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></li>
   {% empty %}
   <li>None.</li>
   {% endfor %}
 </ul>
 
-<h3>Created</h3>
+<h3>{{ user.username }}'s Bids</h3>
 <ul>
-  {% for listing in created_listings %}
-  <li><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></li>
+  {% for bid in user_bids %}
+  <li>{{ bid.listing.id }}</li>
   {% empty %}
   <li>None.</li>
   {% endfor %}
 </ul>
 
-<h3>Won</h3>
-<ul>
-  {% for listing in won_listings %}
-  <li><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></li>
-  {% empty %}
-  <li>None.</li>
-  {% endfor %}
-</ul>
-
-<h3>Active Bids</h3>
+<h3>Active Listing Bids</h3>
 <ul>
   {% for bid in active_listing_bids %}
   <li><a href="{% url 'listing' bid.listing.id %}">{{ bid.listing.title }} </a>${{ bid.listing.amount }} {% if bid.is_current %}<b style="color:green">WINNING</b>{% else %}<b style="color:red">LOSING</b>{% endif %}</li>
@@ -37,6 +28,5 @@
   <li>None.</li>
   {% endfor %}
 </ul>
-
 
 {% endblock %}

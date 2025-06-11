@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django import forms
 from django.forms import ModelForm, Textarea, DecimalField, TextInput
 from django.contrib import messages
-from django.db.models import Subquery
+from django.db.models import Subquery, OuterRef
 
 from decimal import Decimal
 
@@ -244,6 +244,9 @@ def listing(request, listing_id):
             messages.add_message(request, messages.ERROR, "Invalid input")
             return return_render()
 
+    # TODO: I need to make a function that allows the creator of a listing to close it
+    # and then it updates whomever has the highest bid
+
     return return_render()
 
 
@@ -340,17 +343,22 @@ def user(request, user_id):
     watched_listings = this_user.watched_listings.all()
     won_listings = this_user.won_listings_by_user.all()
     created_listings = this_user.listings_by_user.all()
-    # TODO: fix this subquery
-    active_listings = Listing.objects.filter(is_active=True)
-    user_bids = this_user.bids_by_user.all().values_list("listing")
-    active_listing_bids = active_listings & listing_bids
-    test_query =
 
-    winning_bids = []
-    # NOTE: django is throwing a 'row value misused' exception from this loop
-    for bid in active_listing_bids:
-        if bid.is_current:
-            winning_bids.append(bid)
+    active_listings = Listing.objects.filter(is_active=True)
+
+    subquery_user_bids = (
+        this_user.bids_by_user.filter(listing=OuterRef("listing"))
+        .order_by("created_at")
+        .values("pk")[:1]
+    )
+    user_bids = this_user.bids_by_user.filter(
+        pk__in=Subquery(subquery_user_bids)
+    ).order_by("listing", "created_at")
+
+    active_listing_bids = []
+    for bid in user_bids:
+        if bid.listing in active_listings:
+            active_listing_bids.append(bid)
 
     return render(
         request,
@@ -361,6 +369,5 @@ def user(request, user_id):
             "won_listings": won_listings,
             "created_listings": created_listings,
             "active_listing_bids": active_listing_bids,
-            "winning_bids": winning_bids,
         },
     )

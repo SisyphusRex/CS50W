@@ -23,6 +23,7 @@
   <h3>${{ listing.current_price }}</h3>
  </div>
 
+{% if listing.is_active %}
  <div>
   {% if user.is_authenticated %}
     <form method="POST">
@@ -52,6 +53,22 @@
 
   {% else %}
     {{ number_of_bids }} bid(s) so far.
+  {% endif %}
+ </div>
+
+ <div>
+  {% if user == listing.user %}
+  <form method="POST">
+    {% csrf_token %}
+    <input type="submit" value="End Auction" name="end">
+  </form>
+  {% endif %}
+ </div>
+ {% endif %}
+
+ <div>
+  {% if user == listing.winner %}
+  <b style="color:blueviolet">Congratulations, you are the WINNER!</b>
   {% endif %}
  </div>
 

@@ -32,7 +32,16 @@
 <h3>Active Bids</h3>
 <ul>
   {% for bid in active_listing_bids %}
-  <li><a href="{% url 'listing' bid.listing.id %}">{{ bid.listing.title }} </a>${{ bid.listing.amount }} {% if bid.is_current %}<b style="color:green">WINNING</b>{% else %}<b style="color:red">LOSING</b>{% endif %}</li>
+  <li><a href="{% url 'listing' bid.listing.id %}">{{ bid.listing.title }} </a>${{ bid.amount }} {% if bid.is_current %}<b style="color:green">WINNING</b>{% else %}<b style="color:red">LOSING</b>{% endif %}</li>
+  {% empty %}
+  <li>None.</li>
+  {% endfor %}
+</ul>
+
+<h3>All Bids Testing</h3>
+<ul>
+  {% for bid in all_user_bids %}
+  <li><a href="{% url 'listing' bid.listing.id %}">{{ bid.listing.title }}</a> {{ bid.amount }} {{ bid.is_current }}</li>
   {% empty %}
   <li>None.</li>
   {% endfor %}

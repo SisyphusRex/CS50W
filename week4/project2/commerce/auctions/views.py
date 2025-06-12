@@ -239,7 +239,6 @@ def listing(request, listing_id):
             new_comment.save()
             messages.add_message(request, messages.SUCCESS, "Comment Added")
             return return_redirect()
-            messages.add_message(request, messages.ERROR, "not redirected")
         else:
             messages.add_message(request, messages.ERROR, "Invalid input")
             return return_render()
@@ -247,6 +246,11 @@ def listing(request, listing_id):
     # TODO: I need to make a function that allows the creator of a listing to close it
     # and then it updates whomever has the highest bid
 
+    if request.method == "POST" and "end" in request.POST:
+        this_listing.is_active = False
+        this_listing.winner = current_bid.user
+        this_listing.save()
+        return return_redirect()
     return return_render()
 
 
@@ -343,17 +347,18 @@ def user(request, user_id):
     watched_listings = this_user.watched_listings.all()
     won_listings = this_user.won_listings_by_user.all()
     created_listings = this_user.listings_by_user.all()
+    all_user_bids = this_user.bids_by_user.all()
 
     active_listings = Listing.objects.filter(is_active=True)
 
     subquery_user_bids = (
         this_user.bids_by_user.filter(listing=OuterRef("listing"))
-        .order_by("created_at")
+        .order_by("-created_at")
         .values("pk")[:1]
     )
     user_bids = this_user.bids_by_user.filter(
         pk__in=Subquery(subquery_user_bids)
-    ).order_by("listing", "created_at")
+    ).order_by("listing", "-created_at")
 
     active_listing_bids = []
     for bid in user_bids:
@@ -369,5 +374,6 @@ def user(request, user_id):
             "won_listings": won_listings,
             "created_listings": created_listings,
             "active_listing_bids": active_listing_bids,
+            "all_user_bids": all_user_bids,
         },
     )

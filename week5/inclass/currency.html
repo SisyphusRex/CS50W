@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="eng">
+    <head>
+        <title>Currency Exchange</title>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                
+                document.querySelector('#abilityform').onsubmit = () => {
+
+                    const number = document.querySelector('#ability').value;
+
+                    fetch('https://pokeapi.co/api/v2/pokemon/ditto')
+                    .then(response => response.json())
+                    .then(data => {
+                    const ability = data.abilities[number].ability.name;
+                    console.log(ability);
+                    document.querySelector('#ability').innerHTML = `${number} ability is ${ability}`;
+                    })
+
+                   return false; 
+                }
+                
+                
+            })
+            
+            
+        </script>
+    </head>
+    <body>
+        <h1>Ditto</h1>
+        <form id="abilityform">
+            <input id="ability" placeholder="Which Ability?" type="number">
+            <input type="submit" value="Get">
+        </form>
+        <div id="ability">
+
+        </div>
+    </body>
+</html>

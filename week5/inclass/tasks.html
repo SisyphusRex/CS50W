@@ -9,11 +9,17 @@
                 document.querySelector('#submit').disabled = true;
 
                 document.querySelector('#task').onkeyup = () => {
-                    document.querySelector('#submit').disabled = false;
+                    if (document.querySelector('#task').value.length > 0) {
+                        document.querySelector('#submit').disabled = false;
+                    } else {
+                        document.querySelector('#submit').disabled = true;
+                    }
+                    
                 }
 
                 document.querySelector('form').onsubmit = () => {
                     const task = document.querySelector('#task').value;
+                    console.log(task);
                     const newLi = document.createElement('li');
                     newLi.textContent = task;
                     document.querySelector('#tasks').appendChild(newLi);

@@ -7,14 +7,31 @@
                 
                 document.querySelector('#abilityform').onsubmit = () => {
 
-                    const number = document.querySelector('#ability').value;
+                    
 
                     fetch('https://pokeapi.co/api/v2/pokemon/ditto')
                     .then(response => response.json())
                     .then(data => {
-                    const ability = data.abilities[number].ability.name;
-                    console.log(ability);
-                    document.querySelector('#abilitydiv').innerHTML = `${number} ability is ${ability}`;
+                        const number = document.querySelector('#ability1').value;
+                        let ability;
+                        
+                       try {
+                            ability = data.abilities[number].ability.name;
+                        } catch (error) {
+                            console.log(error.message);
+                        }
+                        
+                        
+                        if (ability !== undefined) {
+                            document.querySelector('#abilitydiv').innerHTML = `${number} ability is ${ability}`;
+                        } else {
+                            document.querySelector('#abilitydiv').innerHTML = 'Invalid entry.'
+                        }
+                        
+                    
+                    })
+                    .catch(error => {
+                        console.log(error.message);
                     })
 
                    return false; 
@@ -29,7 +46,7 @@
     <body>
         <h1>Ditto</h1>
         <form id="abilityform">
-            <input id="ability" placeholder="Which Ability?" type="number">
+            <input id="ability1" placeholder="Which Ability?" type="number">
             <input type="submit" value="Get">
         </form>
         <div id="abilitydiv">

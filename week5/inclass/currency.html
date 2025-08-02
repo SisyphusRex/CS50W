@@ -14,7 +14,7 @@
                     .then(data => {
                     const ability = data.abilities[number].ability.name;
                     console.log(ability);
-                    document.querySelector('#ability').innerHTML = `${number} ability is ${ability}`;
+                    document.querySelector('#abilitydiv').innerHTML = `${number} ability is ${ability}`;
                     })
 
                    return false; 
@@ -32,7 +32,7 @@
             <input id="ability" placeholder="Which Ability?" type="number">
             <input type="submit" value="Get">
         </form>
-        <div id="ability">
+        <div id="abilitydiv">
 
         </div>
     </body>

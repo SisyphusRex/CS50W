@@ -1,7 +1,7 @@
 import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
+from django.db import IntegrityError, OperationalError
 from django.http import JsonResponse
 from django.shortcuts import HttpResponse, HttpResponseRedirect, render
 from django.urls import reverse
@@ -173,6 +173,10 @@ def register(request):
             return render(request, "mail/register.html", {
                 "message": "Email address already taken."
             })
+        # except OperationalError as e:
+        #     return render(request, "mail/register.html", {
+        #         "message": "mail_user table missing"
+        #     })
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:

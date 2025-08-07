@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#compose').addEventListener('click', compose_email);
   // listen for compose email send submit
   // TODO: listener is not finding when the compose email button is submitted
-  document.querySelector('#compose-form').onsubmit = send_email();
+  document.querySelector('#compose-form').onsubmit = () => send_email();
 
   // By default, load the inbox
   load_mailbox('inbox'); 

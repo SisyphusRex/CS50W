@@ -1,3 +1,5 @@
+//TODO: Fix css file so the elements will use style
+
 document.addEventListener('DOMContentLoaded', function () {
 
     // Use buttons to toggle between views
@@ -12,16 +14,26 @@ document.addEventListener('DOMContentLoaded', function () {
     load_mailbox('inbox');
 });
 
-function compose_email() {
+function compose_email(emailToReplyTo = 'none') {
 
     // Show compose view and hide other views
     document.querySelector('#emails-view').style.display = 'none';
     document.querySelector('#compose-view').style.display = 'block';
+    document.querySelector('#single-email-view').style.display = 'none';
 
     // Clear out composition fields
     document.querySelector('#compose-recipients').value = '';
     document.querySelector('#compose-subject').value = '';
     document.querySelector('#compose-body').value = '';
+
+    if (emailToReplyTo !== 'none') {
+        document.querySelector('#compose-recipients').value = emailToReplyTo.sender;
+        var subject = 'Re: ';
+        subject += emailToReplyTo.subject;
+        document.querySelector('#compose-subject').value = subject;
+        var body = `On ${emailToReplyTo.timestamp} ${emailToReplyTo.sender} wrote: ${emailToReplyTo.body}`;
+
+    }
 }
 
 function load_mailbox(mailbox) {
@@ -29,10 +41,15 @@ function load_mailbox(mailbox) {
     // Show the mailbox and hide other views
     document.querySelector('#emails-view').style.display = 'block';
     document.querySelector('#compose-view').style.display = 'none';
+    document.querySelector('#single-email-view').style.display = 'none';
+
+    document.querySelector('#emails')
 
     // Show the mailbox name
 
-    document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+    document.querySelector('#mailbox-title').textContent = `${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}`;
+
+    document.querySelector('#email-divs').innerHTML = '';
 
     // query email server
     fetch(`/emails/${mailbox}`)
@@ -43,11 +60,31 @@ function load_mailbox(mailbox) {
 
             } else {
                 for (let email of emails) {
-                    // TODO: add from, subject, timestamp
+
                     var newDiv = document.createElement('div');
-                    console.log(email.id);
-                    newDiv.textContent = email.id;
-                    document.querySelector('#emails-view').appendChild(newDiv);
+                    newDiv.style.border = '1px solid blue';
+                    newDiv.style.marginBottom = '5px';
+                    if (email.read === 'true') {
+                        newDiv.style.backgroundColor = 'grey';
+                    } else {
+                        newDiv.style.backgroundColor = 'green';
+                    }
+                    var fromAddress = document.createElement('span');
+                    fromAddress.style.padding = '10px';
+                    fromAddress.style.fontWeight = 'bold';
+                    var subject = document.createElement('span');
+                    subject.style.padding = '10px';
+                    var timeStamp = document.createElement('span');
+                    timeStamp.style.float = 'right';
+                    fromAddress.textContent = email.sender;
+                    subject.textContent = email.subject;
+                    timeStamp.textContent = email.timestamp;
+
+                    newDiv.append(fromAddress, subject, timeStamp);
+
+                    newDiv.addEventListener('click', () => load_email(email.id));
+
+                    document.querySelector('#email-divs').appendChild(newDiv);
                 }
             }
         })
@@ -89,5 +126,46 @@ function send_email() {
         })
 
     // return to inbox after send
+    return false;
+}
+
+function load_email(emailID) {
+    document.querySelector('#emails-view').style.display = 'none';
+    document.querySelector('#compose-view').style.display = 'none';
+    document.querySelector('#single-email-view').style.display = 'block';
+
+    fetch(`/emails/${emailID}`)
+        .then(response => response.json())
+        .then(data => {
+            const from = document.createElement('span');
+            const to = document.createElement('span');
+            const subject = document.createElement('span');
+            const timeStamp = document.createElement('span');
+            const body = document.createElement('p');
+
+            from.textContent = data.sender;
+            for (let address of data.recipients) {
+                to.textContent += `${address}, `;
+            }
+            subject.textContent = data.subject;
+            timeStamp.textContent = data.timestamp;
+            body.textContent = data.body;
+
+
+
+            document.querySelector('#from-div').appendChild(from);
+            document.querySelector('#to-div').appendChild(to);
+            document.querySelector('#subject-div').appendChild(subject);
+            document.querySelector('#timestamp-div').appendChild(timeStamp);
+            document.querySelector('#email-body').appendChild(body);
+
+            const replyButton = document.createElement('button');
+            replyButton.className = 'btn btn-sm btn-outline-primary';
+            replyButton.innerHTML = 'Reply';
+            replyButton.addEventListener('click', () => compose_email(data));
+            document.querySelector('#reply').appendChild(replyButton);
+
+        })
+
     return false;
 }

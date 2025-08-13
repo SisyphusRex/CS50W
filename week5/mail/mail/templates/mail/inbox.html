@@ -13,6 +13,9 @@
 
     <div id="emails-view">
       <h3 id="mailbox-title"></h3>
+      <div id="email-divs">
+
+      </div>
     </div>
 
     <div id="compose-view">
@@ -30,6 +33,15 @@
             <textarea class="form-control" id="compose-body" placeholder="Body"></textarea>
             <input type="submit" class="btn btn-primary"/>
         </form>
+    </div>
+
+    <div id="single-email-view">
+      <div id="from-div"><span class="email-prefix">From: </span></div>
+      <div id="to-div"><span class="email-prefix">To: </span></div>
+      <div id="subject-div"><span class="email-prefix">Subject: </span></div>
+      <div id="timestamp-div"><span class="email-prefix">Timestamp: </span></div>
+      <div id="reply"></div>
+      <div id="email-body"></div>
     </div>
 {% endblock %}
 

@@ -9,7 +9,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class EmailAdmin(admin.ModelAdmin):
-    list_display = ("id", "sender", "recipients", "subject")
+    list_display = ("id", "sender", "subject")
 
 
 admin.site.register(User, UserAdmin)

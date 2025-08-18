@@ -66,7 +66,7 @@ function load_mailbox(mailbox) {
                     var newDiv = document.createElement('div');
                     newDiv.style.border = '1px solid blue';
                     newDiv.style.marginBottom = '5px';
-                    if (email.read === 'true') {
+                    if (email.read === true) {
                         newDiv.style.backgroundColor = 'grey';
                     } else {
                         newDiv.style.backgroundColor = 'green';
@@ -86,7 +86,14 @@ function load_mailbox(mailbox) {
 
                     newDiv.addEventListener('click', () => load_email(email.id));
 
-                    document.querySelector('#email-divs').appendChild(newDiv);
+                    if (mailbox === 'archive') {
+                        if (email.archived === true) {
+                            document.querySelector('#email-divs').appendChild(newDiv);
+                        }
+                    } else if (email.archived === false) {
+                        document.querySelector('#email-divs').appendChild(newDiv);
+                    }
+
                 }
             }
         })
@@ -136,6 +143,21 @@ function load_email(emailID) {
     document.querySelector('#compose-view').style.display = 'none';
     document.querySelector('#single-email-view').style.display = 'block';
 
+    document.querySelector('#from-span').innerHTML = '';
+    document.querySelector('#to-span').innerHTML = '';
+    document.querySelector('#subject-span').innerHTML = '';
+    document.querySelector('#timestamp-span').innerHTML = '';
+    document.querySelector('#email-body').innerHTML = '';
+    document.querySelector('#reply-button-div').innerHTML = '';
+    document.querySelector('#archive-button-div').innerHTML = '';
+
+    fetch(`emails/${emailID}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            read: true
+        })
+    })
+
     fetch(`/emails/${emailID}`)
         .then(response => response.json())
         .then(data => {
@@ -155,19 +177,63 @@ function load_email(emailID) {
 
 
 
-            document.querySelector('#from-div').appendChild(from);
-            document.querySelector('#to-div').appendChild(to);
-            document.querySelector('#subject-div').appendChild(subject);
-            document.querySelector('#timestamp-div').appendChild(timeStamp);
+            document.querySelector('#from-span').appendChild(from);
+            document.querySelector('#to-span').appendChild(to);
+            document.querySelector('#subject-span').appendChild(subject);
+            document.querySelector('#timestamp-span').appendChild(timeStamp);
             document.querySelector('#email-body').appendChild(body);
 
             const replyButton = document.createElement('button');
             replyButton.className = 'btn btn-sm btn-outline-primary';
             replyButton.innerHTML = 'Reply';
             replyButton.addEventListener('click', () => compose_email(data));
-            document.querySelector('#reply').appendChild(replyButton);
+            document.querySelector('#reply-button-div').appendChild(replyButton);
+
+            const archiveButton = document.createElement('button');
+            archiveButton.className = 'btn btn-sm btn-outline-primary';
+            if (data.archived) {
+                archiveButton.innerHTML = 'Unarchive';
+            } else {
+                archiveButton.innerHTML = 'Archive';
+            }
+
+            archiveButton.addEventListener('click', () => archive_email(data.id, data.archived));
+            document.querySelector('#archive-button-div').appendChild(archiveButton);
+
+
+
 
         })
+
+    return false;
+}
+
+function archive_email(emailID, archived) {
+
+    if (!archived) {
+        fetch(`emails/${emailID}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                archived: true
+            })
+        })
+            .then(response => {
+                load_mailbox('inbox');
+            })
+    } else {
+        fetch(`emails/${emailID}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                archived: false
+            })
+        })
+            .then(response => {
+                load_mailbox('inbox');
+            })
+    }
+
+
+
 
     return false;
 }

@@ -7,6 +7,6 @@ textarea {
 }
 
 #email-body {
-    border-top: 1px solid grey;
-    margin-top: 5px;
+    border-top: 5px solid green;
+    margin-top: 20px;
 }

@@ -1,4 +1,4 @@
-//TODO: Fix css file so the elements will use style
+
 
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -31,7 +31,9 @@ function compose_email(emailToReplyTo = 'none') {
         var subject = 'Re: ';
         subject += emailToReplyTo.subject;
         document.querySelector('#compose-subject').value = subject;
-        var body = `On ${emailToReplyTo.timestamp} ${emailToReplyTo.sender} wrote: ${emailToReplyTo.body}`;
+        var body = `On ${emailToReplyTo.timestamp} ${emailToReplyTo.sender} wrote: \n\n${emailToReplyTo.body}`;
+        console.log(body);
+        document.querySelector('#compose-body').value = body;
 
     }
 }
